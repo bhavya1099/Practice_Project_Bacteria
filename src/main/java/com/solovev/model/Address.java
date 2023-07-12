@@ -1,23 +1,35 @@
 package com.solovev.model;
 
-import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Class to store the address of the filled and bacteria in it
  */
 public class Address {
     private Bacteria bacteria;
-    private final int x;
-    private final int y;
-    /**
-     * max value (exclusive) for both x and y, min is always 0
-     */
-    private final int limit;
+    private final int height;
+    private final int width;
 
-    public Address(int x, int y, int limit) {
-        this.x = x;
-        this.y = y;
-        this.limit = limit;
+    /**
+     * Creates address
+     * @param height must be > 0
+     * @param width must be > 0
+     * @throws IndexOutOfBoundsException if x or y is > 0
+     */
+    public Address(int height, int width) {
+        if(height < 0 || width < 0){
+            throw  new IndexOutOfBoundsException("x and y must be > 0, but x=" + height + " and y=" + width);
+        }
+        this.height = height;
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
     }
 
     public void setBacteria(Bacteria bacteria) {
@@ -29,11 +41,37 @@ public class Address {
     }
 
     /**
-     * Returns empty neighbors of this address.
-     * For example for address 0,0 -> 01,10,11; for 11 in 3x3 fir->
-     * @return
+     * checks if address does not contain bacteria
+     * @return true if bacteria is null a false otherwise
      */
-    public Collection<Address> getEmptyNeighbors(){
+     public boolean isEmpty(){
+        return bacteria == null;
+     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Address address)) return false;
+
+        if (height != address.height) return false;
+        if (width != address.width) return false;
+        return Objects.equals(bacteria, address.bacteria);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = bacteria != null ? bacteria.hashCode() : 0;
+        result = 31 * result + height;
+        result = 31 * result + width;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "bacteria=" + bacteria +
+                ", x=" + height +
+                ", y=" + width +
+                '}';
     }
 }
