@@ -6,11 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.time.Period;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class PetryPotTest {
@@ -89,6 +84,47 @@ class PetryPotTest {
             assertEquals(bacteriaToFill, pot3x3.getBacteria(2, 2));
 
             assertNull(pot3x3.getBacteria(1, 1));
+        }
+        @Test
+        public void neighbors11AddressAllFilled() {
+            Bacteria bacteriaToFill = new Bacteria();
+            for (int i = 0; i < 3; i++){
+                for(int j =0; j < 3; j++){
+                    pot3x3.putBacteria(i,j,new Bacteria());
+                }
+            }
+            pot3x3.fillNotEmptyNeighbors(1, 1, () -> bacteriaToFill);
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(0, 0));
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(0, 1));
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(0, 2));
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(1, 0));
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(1, 2));
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(2, 0));
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(2, 1));
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(2, 2));
+            assertNotSame(bacteriaToFill,pot3x3.getBacteria(1, 1));
+        }
+        @Test
+        public void neighbors11AddressSomeFilled() {
+            Bacteria bacteriaToFill = new Bacteria();
+            for (int i = 0; i < 2; i++){
+                for(int j =0; j < 2; j++){
+                    pot3x3.putBacteria(i,j,new Bacteria());
+                }
+            }
+            pot3x3.fillNotEmptyNeighbors(1, 1, () -> bacteriaToFill);
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(0, 0));
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(0, 1));
+            assertNotSame(bacteriaToFill, pot3x3.getBacteria(1, 0));
+            assertNotSame(bacteriaToFill,pot3x3.getBacteria(1, 1));
+
+            assertSame(bacteriaToFill, pot3x3.getBacteria(0, 2));
+            assertSame(bacteriaToFill, pot3x3.getBacteria(1, 2));
+            assertSame(bacteriaToFill, pot3x3.getBacteria(2, 0));
+            assertSame(bacteriaToFill, pot3x3.getBacteria(2, 1));
+            assertSame(bacteriaToFill, pot3x3.getBacteria(2, 2));
+
+
         }
 
         @Test
