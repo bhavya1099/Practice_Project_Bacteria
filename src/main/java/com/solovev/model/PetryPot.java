@@ -10,17 +10,10 @@ import java.util.function.Supplier;
  */
 public class PetryPot {
     public static final int MAX_SIZE = 10; //todo out of heap for 12_113 now 6k is max
-    private final Bacteria[][] bacterias;
     private final int size;
-    private final LinkedList<Address> freeAddresses = new LinkedList<>();
+    private final Map<Address, Bacteria> addresses = new HashMap<>();
 
-    /**
-     * Inner class that represent Address in the bacterias
-     *
-     * @param y array in the bacterias
-     * @param x inner index of this array in bacterias
-     */
-    private record Address(int y, int x) {
+    public record Address(int x, int y) {
     }
 
     /**
@@ -42,17 +35,15 @@ public class PetryPot {
      * @param size dimensions of the field, must be from 0 to MAX_SIZE
      */
     public PetryPot(int size) {
-        if (size > MAX_SIZE) {
-            throw new IllegalArgumentException("Size must be < " + MAX_SIZE);
+        if (size > MAX_SIZE || size < 0) {
+            throw new IllegalArgumentException("Size must be > 0 and < " + MAX_SIZE );
         }
         this.size = size;
-        bacterias = new Bacteria[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                freeAddresses.add(new Address(i, j));
+                addresses.put(new Address(i, j), null);
             }
         }
-        Collections.shuffle(freeAddresses);
     }
 
     /**
@@ -67,10 +58,6 @@ public class PetryPot {
         if (conf.toNumber() == 0) {
             return new Response(-1, 0);
         }
-        while(!freeAddresses.isEmpty()){
-            days++;
-            putBacterias(conf);
-        }
         return new Response(days, deadBacteria);
     }
 
@@ -82,9 +69,6 @@ public class PetryPot {
     private void putBacterias(ConfigurationOfBacteriaBehavior conf) {
         int numberOfBacterias = new Random().nextInt(conf.fromNumber() - 1, conf.toNumber()) + 1;
 
-        for(int i =0; i< numberOfBacterias && !freeAddresses.isEmpty(); i++){
-            putBacteria(freeAddresses.peek().y(),freeAddresses.poll().x(), new Bacteria(conf)) ;
-        }
     }
 
     /**
@@ -114,36 +98,31 @@ public class PetryPot {
         return size;
     }
 
-    public Bacteria[][] getBacterias() {
-        return bacterias;
-    }
-
     /**
-     * gets bacteria of the given height and width
+     * gets bacteria of the given x and y
      *
-     * @param height first part of address
-     * @param width  second part of address
+     * @param x first part of address
+     * @param y second part of address
      * @return bacteria on this address or null if empty
      */
-    public Bacteria getBacteria(int height, int width) {
-        return bacterias[height][width];
+    public Bacteria getBacteria(int x, int y) {
+        return addresses.get(new Address(x, y));
+    }
+
+    public Map<Address, Bacteria> getBacterias() {
+        return addresses;
     }
 
     /**
      * Puts bacteria in the given place if it is not already filled
      *
-     * @param height        first part of address
-     * @param width         second part of address
+     * @param x             first part of address
+     * @param y             second part of address
      * @param bacteriaToPut bacteria to put to this place
      * @return true if bacteria was put, false if the place was already not empty
      */
-    public boolean putBacteria(int height, int width, Bacteria bacteriaToPut) {
-        boolean placeEmpty = bacterias[height][width] == null;
-        if (placeEmpty) {
-            bacterias[height][width] = bacteriaToPut;
-            freeAddresses.remove(new Address(height, width));
-        }
-        return placeEmpty;
+    public boolean putBacteria(int x, int y, Bacteria bacteriaToPut) {
+        return addresses.putIfAbsent(new Address(x, y), bacteriaToPut) == null;
     }
 
 }

@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,25 +19,25 @@ class PetryPotTest {
     @Test
     public void creationMaxSize(){
         int size = PetryPot.MAX_SIZE;
-        assertEquals(size, new PetryPot(size).getBacterias().length);
-        assertEquals(size, new PetryPot(size).getBacterias()[0].length);
+        assertTrue(new PetryPot(size).getBacterias().containsKey(new PetryPot.Address(size -1,size-1)));
+        assertFalse(new PetryPot(size).getBacterias().containsKey(new PetryPot.Address(size,size)));
     }
 
     @ParameterizedTest()
     @ValueSource(ints = {1, 2, 3, 5})
     public void creationTestNormal(int size) {
-        assertEquals(size, new PetryPot(size).getBacterias().length);
-        assertEquals(size, new PetryPot(size).getBacterias()[0].length);
+        assertTrue(new PetryPot(size).getBacterias().containsKey(new PetryPot.Address(size -1,size-1)));
+        assertFalse(new PetryPot(size).getBacterias().containsKey(new PetryPot.Address(size,size)));
     }
 
     @Test
     public void creationEmptyTest() {
-        assertEquals(0, new PetryPot().getBacterias().length);
+        assertEquals(new HashMap<>(), new PetryPot().getBacterias());
     }
 
     @Test
     public void creationTestThrows() {
-        assertThrows(NegativeArraySizeException.class, () -> new PetryPot(-1));
+        assertThrows(IllegalArgumentException.class, () -> new PetryPot(-1));
         assertThrows(IllegalArgumentException.class, () -> new PetryPot(PetryPot.MAX_SIZE +1));
     }
     @Nested
@@ -78,10 +79,10 @@ class PetryPotTest {
         @Test
         public void neighborsNoNeighbors() throws InvocationTargetException, IllegalAccessException {
             fillNeighborsPot3x3.invoke(emptyPot, 0, 0, bacteriaSupplier);
-            assertArrayEquals(new Bacteria[0][0], emptyPot.getBacterias());
+            assertEquals(new HashMap<>(), emptyPot.getBacterias());
 
             PetryPot onePot = new PetryPot(1);
-            assertNull(onePot.getBacterias()[0][0]);
+            assertNull(onePot.getBacteria(0,0));
         }
 
         @Test
