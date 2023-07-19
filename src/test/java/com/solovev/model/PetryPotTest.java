@@ -15,9 +15,15 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PetryPotTest {
+    @Test
+    public void creationMaxSize(){
+        int size = PetryPot.MAX_SIZE;
+        assertEquals(size, new PetryPot(size).getBacterias().length);
+        assertEquals(size, new PetryPot(size).getBacterias()[0].length);
+    }
 
     @ParameterizedTest()
-    @ValueSource(ints = {1, 2, 3, 5, 12113})
+    @ValueSource(ints = {1, 2, 3, 5})
     public void creationTestNormal(int size) {
         assertEquals(size, new PetryPot(size).getBacterias().length);
         assertEquals(size, new PetryPot(size).getBacterias()[0].length);
@@ -31,15 +37,20 @@ class PetryPotTest {
     @Test
     public void creationTestThrows() {
         assertThrows(NegativeArraySizeException.class, () -> new PetryPot(-1));
-        assertThrows(IllegalArgumentException.class, () -> new PetryPot(12_114));
+        assertThrows(IllegalArgumentException.class, () -> new PetryPot(PetryPot.MAX_SIZE +1));
     }
     @Test
     public void calculateDaysOneBacteria(){
-        PetryPot pot12113x12113 = new PetryPot(12_113);
+        PetryPot potMAX = new PetryPot(PetryPot.MAX_SIZE);
         ConfigurationOfBacteriaBehavior oneBacteriaDay = new ConfigurationOfBacteriaBehavior(1,1,0,0);
 
-        assertEquals(new PetryPot.Response(3,0),pot3x3.calculateDays(oneBacteriaDay));
-        assertEquals(new PetryPot.Response(12113,0),pot12113x12113.calculateDays(oneBacteriaDay));
+        assertEquals(new PetryPot.Response(9,0),pot3x3.calculateDays(oneBacteriaDay));
+        assertEquals(new PetryPot.Response(1,0),pot3x3.calculateDays(new ConfigurationOfBacteriaBehavior(9,9,0,0)));
+
+        assertEquals(new PetryPot.Response(PetryPot.MAX_SIZE*PetryPot.MAX_SIZE,0),potMAX.calculateDays(oneBacteriaDay));
+        assertEquals(new PetryPot.Response(PetryPot.MAX_SIZE,0),potMAX.calculateDays(new ConfigurationOfBacteriaBehavior(PetryPot.MAX_SIZE,PetryPot.MAX_SIZE,0,0)));
+        assertAll(() -> potMAX.calculateDays(new ConfigurationOfBacteriaBehavior(Integer.MAX_VALUE,Integer.MAX_VALUE,0,0)));
+
         assertEquals(new PetryPot.Response(0,0),emptyPot.calculateDays(oneBacteriaDay));
         assertEquals(new PetryPot.Response(0,0),emptyPot.calculateDays(new ConfigurationOfBacteriaBehavior(0,0,0,0)));
 

@@ -9,6 +9,7 @@ import java.util.function.Supplier;
  * Class represents a bunch of addresses, and bacteria behaviour in the pot
  */
 public class PetryPot {
+    public static final int MAX_SIZE = 5000; //todo out of heap for 12_113
     private final Bacteria[][] bacterias;
     private final int size;
     private final LinkedList<Address> freeAddresses = new LinkedList<>();
@@ -38,18 +39,16 @@ public class PetryPot {
     /**
      * Creates N*N field of empty addresses
      *
-     * @param size dimensions of the field, must be from 0 to 12_113
+     * @param size dimensions of the field, must be from 0 to MAX_SIZE
      */
     public PetryPot(int size) {
-        if (size > 12_113) {
-            throw new IllegalArgumentException("Size must be < 12_113");
+        if (size > MAX_SIZE) {
+            throw new IllegalArgumentException("Size must be < " + MAX_SIZE);
         }
         this.size = size;
         bacterias = new Bacteria[size][size];
-
-        //free addresses initialisation and shuffling
-        for (int i = 0; i < size; i++) {
-            for(int j =0; j< size; j++){
+        for (int i =0; i< size; i++){
+            for(int j =0; j< size;j++){
                 freeAddresses.add(new Address(i,j));
             }
         }
