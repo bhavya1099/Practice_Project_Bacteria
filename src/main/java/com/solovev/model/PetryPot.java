@@ -17,14 +17,45 @@ public class PetryPot {
     }
 
     /**
+     * Class represent response of the calculation
+     * @param days days needed to fill all the pot
+     * @param deadBacteria dead bacteria occurred in the process
+     */
+    public record Response(long days,long deadBacteria){}
+
+    /**
      * Creates N*N field of empty addresses
      *
-     * @param size dimensions of the field, must be from 0 to 12113
+     * @param size dimensions of the field, must be from 0 to 12_113
      */
     public PetryPot(int size) {
+        if (size > 12_113) {
+            throw new IllegalArgumentException("Size must be < 12_113");
+        }
         this.size = size;
         bacterias = new Bacteria[size][size];
     }
+
+    /**
+     * Calculates days needed to fill all field with bacterias
+     *
+     * @param conf configuration of the bacteria behavior
+     * @return days and dead bacteria needed to fill all pot depending on the conf; -1 if it will never be filled
+     */
+    public Response calculateDays(ConfigurationOfBacteriaBehavior conf) {
+        long days = 0;
+        long deadBacteria = 0;
+        if(conf.toNumber() == 0){
+            return new Response(-1,0);
+        }
+
+        return new Response(days,deadBacteria);
+    }
+
+    /**
+     * Puts random number of bacterias to the pot
+     */
+    private void putBacterias(ConfigurationOfBacteriaBehavior conf){}
 
     /**
      * Goes through EMPTY neighbors of the given cell and fills it with the bacteriaSupplier based on the given supplier
@@ -70,14 +101,17 @@ public class PetryPot {
 
     /**
      * Puts bacteria in the given place if it is not already filled
-     * @param height first part of address
-     * @param width  second part of address
+     *
+     * @param height        first part of address
+     * @param width         second part of address
      * @param bacteriaToPut bacteria to put to this place
      * @return true if bacteria was put, false if the place was already not empty
      */
-    public boolean putBacteria(int height, int width, Bacteria bacteriaToPut){
+    public boolean putBacteria(int height, int width, Bacteria bacteriaToPut) {
         boolean placeEmpty = bacterias[height][width] == null;
-        if(placeEmpty) { bacterias[height][width] = bacteriaToPut;}
+        if (placeEmpty) {
+            bacterias[height][width] = bacteriaToPut;
+        }
         return placeEmpty;
     }
 

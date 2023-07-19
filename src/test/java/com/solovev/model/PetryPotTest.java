@@ -31,6 +31,19 @@ class PetryPotTest {
     @Test
     public void creationTestThrows() {
         assertThrows(NegativeArraySizeException.class, () -> new PetryPot(-1));
+        assertThrows(IllegalArgumentException.class, () -> new PetryPot(12_114));
+    }
+    @Test
+    public void calculateDaysOneBacteria(){
+        PetryPot pot12113x12113 = new PetryPot(12_113);
+        ConfigurationOfBacteriaBehavior oneBacteriaDay = new ConfigurationOfBacteriaBehavior(1,1,0,0);
+
+        assertEquals(new PetryPot.Response(3,0),pot3x3.calculateDays(oneBacteriaDay));
+        assertEquals(new PetryPot.Response(12113,0),pot12113x12113.calculateDays(oneBacteriaDay));
+        assertEquals(new PetryPot.Response(0,0),emptyPot.calculateDays(oneBacteriaDay));
+        assertEquals(new PetryPot.Response(0,0),emptyPot.calculateDays(new ConfigurationOfBacteriaBehavior(0,0,0,0)));
+
+        assertEquals(new PetryPot.Response(-1,0),pot3x3.calculateDays(new ConfigurationOfBacteriaBehavior(0,0,0,0)));
     }
 
     @Nested
@@ -41,13 +54,14 @@ class PetryPotTest {
 
         @BeforeAll
         private static void getMethod() throws NoSuchMethodException {
-            fillNeighborsPot3x3=pot3x3.getClass().getDeclaredMethod("fillNotEmptyNeighbors", int.class, int.class, Supplier.class);
+            fillNeighborsPot3x3 = pot3x3.getClass().getDeclaredMethod("fillNotEmptyNeighbors", int.class, int.class, Supplier.class);
             fillNeighborsPot3x3.setAccessible(true);
             bacteriaSupplier = () -> bacteriaToFill;
         }
+
         @Test
         public void neighborsNoNeighbors() throws InvocationTargetException, IllegalAccessException {
-        fillNeighborsPot3x3.invoke(emptyPot,0, 0, bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(emptyPot, 0, 0, bacteriaSupplier);
             assertArrayEquals(new Bacteria[0][0], emptyPot.getBacterias());
 
             PetryPot onePot = new PetryPot(1);
@@ -57,7 +71,7 @@ class PetryPotTest {
         @Test
         public void neighbors00AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
             // Address 0 0
-            fillNeighborsPot3x3.invoke(pot3x3,0,0,bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(pot3x3, 0, 0, bacteriaSupplier);
 
             assertEquals(bacteriaToFill, pot3x3.getBacteria(0, 1));
             assertEquals(bacteriaToFill, pot3x3.getBacteria(1, 1));
@@ -72,7 +86,7 @@ class PetryPotTest {
 
         @Test
         public void neighbors22AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
-            fillNeighborsPot3x3.invoke(pot3x3,2,2,bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(pot3x3, 2, 2, bacteriaSupplier);
 
             assertEquals(bacteriaToFill, pot3x3.getBacteria(1, 2));
             assertEquals(bacteriaToFill, pot3x3.getBacteria(1, 1));
@@ -87,7 +101,7 @@ class PetryPotTest {
 
         @Test
         public void neighbors11AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
-            fillNeighborsPot3x3.invoke(pot3x3,1,1,bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(pot3x3, 1, 1, bacteriaSupplier);
 
             assertEquals(bacteriaToFill, pot3x3.getBacteria(0, 0));
             assertEquals(bacteriaToFill, pot3x3.getBacteria(0, 1));
@@ -109,7 +123,7 @@ class PetryPotTest {
                     pot3x3.putBacteria(i, j, new Bacteria());
                 }
             }
-            fillNeighborsPot3x3.invoke(pot3x3,1,1,bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(pot3x3, 1, 1, bacteriaSupplier);
 
             assertNotSame(bacteriaToFill, pot3x3.getBacteria(0, 0));
             assertNotSame(bacteriaToFill, pot3x3.getBacteria(0, 1));
@@ -129,7 +143,7 @@ class PetryPotTest {
                     pot3x3.putBacteria(i, j, new Bacteria());
                 }
             }
-            fillNeighborsPot3x3.invoke(pot3x3,1,1,bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(pot3x3, 1, 1, bacteriaSupplier);
 
             assertNotSame(bacteriaToFill, pot3x3.getBacteria(0, 0));
             assertNotSame(bacteriaToFill, pot3x3.getBacteria(0, 1));
@@ -147,7 +161,7 @@ class PetryPotTest {
 
         @Test
         public void neighbors10AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
-            fillNeighborsPot3x3.invoke(pot3x3,1,0,bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(pot3x3, 1, 0, bacteriaSupplier);
 
             assertEquals(bacteriaToFill, pot3x3.getBacteria(0, 0));
             assertEquals(bacteriaToFill, pot3x3.getBacteria(0, 1));
@@ -163,7 +177,7 @@ class PetryPotTest {
 
         @Test
         public void neighbors01AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
-            fillNeighborsPot3x3.invoke(pot3x3,0,1,bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(pot3x3, 0, 1, bacteriaSupplier);
 
             assertEquals(bacteriaToFill, pot3x3.getBacteria(0, 0));
             assertEquals(bacteriaToFill, pot3x3.getBacteria(1, 0));
