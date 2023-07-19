@@ -33,7 +33,7 @@ public class PetryPot {
      * @param width            to check neighbors
      * @param bacteriaSupplier providing bacteria
      */
-    public void fillNotEmptyNeighbors(int height, int width, Supplier<Bacteria> bacteriaSupplier) {
+    private void fillNotEmptyNeighbors(int height, int width, Supplier<Bacteria> bacteriaSupplier) {
         int startHeight = Math.max(0, height - 1);
         int endHeight = Math.min(height + 1, size - 1);
         int startWidth = Math.max(0, width - 1);
