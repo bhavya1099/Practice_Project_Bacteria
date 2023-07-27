@@ -137,7 +137,7 @@ class PetryPotTest {
             Bacteria bacteriaToFill = new Bacteria();
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    pot3x3.putBacteria(i, j, new Bacteria());
+                    pot3x3.putBacteria(new PetryPot.Address(i, j), new Bacteria());
                 }
             }
             fillNeighborsPot3x3.invoke(pot3x3, 1, 1, bacteriaSupplier);
@@ -157,7 +157,7 @@ class PetryPotTest {
         public void neighbors11AddressSomeFilled() throws InvocationTargetException, IllegalAccessException {
             for (int i = 0; i < 2; i++) {
                 for (int j = 0; j < 2; j++) {
-                    pot3x3.putBacteria(i, j, new Bacteria());
+                    pot3x3.putBacteria(new PetryPot.Address(i, j), new Bacteria());
                 }
             }
             fillNeighborsPot3x3.invoke(pot3x3, 1, 1, bacteriaSupplier);

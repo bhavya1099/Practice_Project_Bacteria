@@ -12,8 +12,9 @@ public class PetryPot {
     public static final int MAX_SIZE = 10; //todo out of heap for 12_113 now 6k is max
     private final int size;
     private final Map<Address, Bacteria> addresses = new HashMap<>();
+    private long fill;
 
-    public record Address(int x, int y) {
+    public record Address(int x, int y) { //todo white throws
     }
 
     /**
@@ -36,7 +37,7 @@ public class PetryPot {
      */
     public PetryPot(int size) {
         if (size > MAX_SIZE || size < 0) {
-            throw new IllegalArgumentException("Size must be > 0 and < " + MAX_SIZE );
+            throw new IllegalArgumentException("Size must be > 0 and < " + MAX_SIZE);
         }
         this.size = size;
         for (int i = 0; i < size; i++) {
@@ -69,6 +70,7 @@ public class PetryPot {
     private void putBacterias(ConfigurationOfBacteriaBehavior conf) {
         int numberOfBacterias = new Random().nextInt(conf.fromNumber() - 1, conf.toNumber()) + 1;
 
+
     }
 
     /**
@@ -88,7 +90,7 @@ public class PetryPot {
             for (int j = startWidth; j <= endWidth; j++) {
                 if (!(i == height && j == width)) //checks it's not the same address
                 {
-                    putBacteria(i, j, bacteriaSupplier.get());
+                    putBacteria(new Address(i, j), bacteriaSupplier.get());
                 }
             }
         }
@@ -110,19 +112,23 @@ public class PetryPot {
     }
 
     public Map<Address, Bacteria> getBacterias() {
-        return addresses;
+        return Collections.unmodifiableMap(addresses);
     }
 
     /**
      * Puts bacteria in the given place if it is not already filled
      *
-     * @param x             first part of address
-     * @param y             second part of address
+     * @param address       to put the bacteria
      * @param bacteriaToPut bacteria to put to this place
      * @return true if bacteria was put, false if the place was already not empty
      */
-    public boolean putBacteria(int x, int y, Bacteria bacteriaToPut) {
-        return addresses.putIfAbsent(new Address(x, y), bacteriaToPut) == null;
+    public boolean putBacteria(Address address, Bacteria bacteriaToPut) {
+        if (addresses.putIfAbsent(address, bacteriaToPut) == null) {
+            fill++;
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }
