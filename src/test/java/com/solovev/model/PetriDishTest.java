@@ -48,7 +48,16 @@ class PetriDishTest {
             assertEquals(new PetriDish.Response(1, 0), new PetriDish(3).calculateDays(new ConfigurationOfBacteriaBehavior(9, 9, 0, 0)));
             assertEquals(new PetriDish.Response(1, 0), new PetriDish(3).calculateDays(new ConfigurationOfBacteriaBehavior(50, 50, 0, 0)));
 
+            assertEquals(new PetriDish.Response(3, 0), new PetriDish(3).calculateDays(new ConfigurationOfBacteriaBehavior(3, 3, 0, 0)));
+
             assertEquals(new PetriDish.Response(-1, 0), new PetriDish(3).calculateDays(new ConfigurationOfBacteriaBehavior(0, 0, 0, 0)));
+        }
+        @Test
+        public void calcDaysEqualPut(){
+            int size = 5;
+            ConfigurationOfBacteriaBehavior confSizeIndayNoOther = new ConfigurationOfBacteriaBehavior(size,size,0,0);
+            PetriDish dish = new PetriDish(size);
+            assertEquals(size,dish.calculateDays(confSizeIndayNoOther).days());
         }
         @Test
         public void calculateDaysOneBacteriaPotMax() {

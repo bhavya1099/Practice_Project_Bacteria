@@ -9,8 +9,14 @@ import java.util.stream.Collectors;
  */
 public class PetriDish {
     public static final int MAX_SIZE = 10; //todo out of heap for 12_113 now 6k is max
-
+    /**
+     * dimension of the field, must be from 0 to MAX_SIZE; overall real size is size^2
+     */
     private final int size;
+    /**
+     * counts bacteria dead and alive in the dish
+     */
+    private int fill;
     private final Map<Address, Bacteria> addresses = new HashMap<>();
     private long days;
     private long deadBacteria;
@@ -97,7 +103,7 @@ public class PetriDish {
      */
     public PetriDish(int size) {
         if (size > MAX_SIZE || size < 0) {
-            throw new IllegalArgumentException("Size must be > 0 and < " + MAX_SIZE);
+            throw new IllegalArgumentException("Size must be >= 0 and < " + MAX_SIZE);
         }
         this.size = size;
         for (int i = 0; i < size; i++) {
@@ -117,7 +123,33 @@ public class PetriDish {
         if (conf.toNumber() == 0) {
             return new Response(-1, 0);
         }
+        //first bacteria divides if not sterile, then it can die or becomes sterile, then new bacterias are put in the dish
+        while (notFull()) {
+            days++;
+            divideBacteria();
+            putBacterias(conf);
+        }
         return new Response(days, deadBacteria);
+    }
+
+    /**
+     * all not dead or sterile bacterias present in the dish first divides then grows old; Bacteria can die during this method and will increment dead bacteria counter
+     */
+    private void divideBacteria() {
+        Collection<Map.Entry<Address, Bacteria>> notEmptyNotDeadAddresses = addresses //todo this or store in memory?
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue() != null && entry.getValue().isAlive())
+                .collect(Collectors.toSet());
+
+        for (Map.Entry<Address, Bacteria> entry : notEmptyNotDeadAddresses) {
+            Bacteria bacteria = entry.getValue();
+            fillNotEmptyNeighbors(entry.getKey(), bacteria.divisionStrategy());
+            //after division, it grows old and can become sterile or die
+            if (bacteria.growOld()) {
+                deadBacteria++;
+            }
+        }
     }
 
     /**
@@ -126,25 +158,22 @@ public class PetriDish {
      * @param conf config to base putting on
      */
     private void putBacterias(ConfigurationOfBacteriaBehavior conf) {
-        int numberOfBacterias = new Random().nextInt(conf.fromNumber() - 1, conf.toNumber()) + 1;
+        Random rand = new Random();
+        int numberOfBacterias = rand.nextInt(conf.fromNumber() - 1, conf.toNumber()) + 1;
 
-
-    }
-
-    /**
-     * Passes the day for this petri dish performing all necessary actions
-     * first bacteria divides if not sterile, then it can die or becomes sterile, then new bacterias are put in the dish
-     */
-    private void dayPass(ConfigurationOfBacteriaBehavior conf) {
-        days++;
-        Set<Map.Entry<Address, Bacteria>> notEmptyAddresses = addresses //todo this or store in memory?
+        List<Address> emptyAddresses = addresses
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getValue() != null)
-                .collect(Collectors.toSet());
-
-        for (Map.Entry<Address, Bacteria> entry : notEmptyAddresses) {
-
+                .filter(entry -> entry.getValue() == null)
+                .map(Map.Entry::getKey)
+                .toList();
+        int emptySize = emptyAddresses.size();
+        if (emptySize > numberOfBacterias) {
+            for (int i = 0; i < numberOfBacterias; i++) {
+                putBacteria(emptyAddresses.get(rand.nextInt(emptySize)), new Bacteria(conf));
+            }
+        } else {
+            emptyAddresses.forEach(address -> putBacteria(address, new Bacteria(conf)));
         }
     }
 
@@ -187,8 +216,22 @@ public class PetriDish {
      * @return true if bacteria was put, false if the place was already not empty
      */
     public boolean putBacteria(Address address, Bacteria bacteriaToPut) {
-        return bacteriaToPut != null
-                && addresses.putIfAbsent(address, bacteriaToPut) == null;
+        boolean result = false;
+        if (bacteriaToPut != null
+                && addresses.putIfAbsent(address, bacteriaToPut) == null) {
+            result = true;
+            fill++;
+        }
+        return result;
+    }
+
+    /**
+     * Checks if dish is full or not
+     *
+     * @return true is dish is full
+     */
+    public boolean notFull() {
+        return fill < size * size;
     }
 
 }

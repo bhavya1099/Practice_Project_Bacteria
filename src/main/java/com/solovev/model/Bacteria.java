@@ -34,8 +34,7 @@ public class Bacteria {
         if (isAlive && age >= DEAD_DAYS) {
             died = new Random().nextDouble() < config.probabilityDead();
             if (died) {
-                isSterile = true;
-                isAlive = false;
+                setDead();
             }
         }
         if (!isSterile && age >= STERILE_DAYS) {
@@ -66,11 +65,10 @@ public class Bacteria {
     public boolean isAlive() {
         return isAlive;
     }
-
-    public void setAlive(boolean alive) {
-        isAlive = alive;
+    public void setDead(){
+        isSterile = true;
+        isAlive = false;
     }
-
     public boolean isSterile() {
         return isSterile;
     }
@@ -90,5 +88,14 @@ public class Bacteria {
     @Override
     public int hashCode() {
         return Objects.hash(age, isAlive, isSterile, config);
+    }
+
+    @Override
+    public String toString() {
+        return "Bacteria{" +
+                "age=" + age +
+                ", isAlive=" + isAlive +
+                ", isSterile=" + isSterile +
+                '}';
     }
 }
