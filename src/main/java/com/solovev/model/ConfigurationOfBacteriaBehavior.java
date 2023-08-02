@@ -22,10 +22,10 @@ public record ConfigurationOfBacteriaBehavior
         }
 
         if(probabilityDead > 1) {
-            throw new IllegalArgumentException("probabilityDead must be < 1");
+            throw new IllegalArgumentException("probabilityDead must be <= 1");
         }
         if(probabilityDivision > 1) {
-            throw new IllegalArgumentException("probability division must be < 1");
+            throw new IllegalArgumentException("probability division must be <= 1");
         }
     }
 

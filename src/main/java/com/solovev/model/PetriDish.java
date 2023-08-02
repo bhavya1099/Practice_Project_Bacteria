@@ -1,18 +1,21 @@
 package com.solovev.model;
 
-import com.solovev.Main;
-
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Class represents a bunch of addresses, and bacteria behaviour in the pot
  */
-public class PetryPot {
+public class PetriDish {
     public static final int MAX_SIZE = 10; //todo out of heap for 12_113 now 6k is max
     private final int size;
     private final Map<Address, Bacteria> addresses = new HashMap<>();
     private long fill;
+    private long days;
+    private long deadBacteria;
+    private final int STERILE_DAYS = 14; // after this age bacteria can not divide
+    private final int DEAD_DAYS = 7; // after this age bacteria gets probability to die
 
     public record Address(int x, int y) { //todo white throws
     }
@@ -26,7 +29,7 @@ public class PetryPot {
     public record Response(long days, long deadBacteria) {
     }
 
-    public PetryPot() {
+    public PetriDish() {
         this(0);
     }
 
@@ -35,7 +38,7 @@ public class PetryPot {
      *
      * @param size dimensions of the field, must be from 0 to MAX_SIZE
      */
-    public PetryPot(int size) {
+    public PetriDish(int size) {
         if (size > MAX_SIZE || size < 0) {
             throw new IllegalArgumentException("Size must be > 0 and < " + MAX_SIZE);
         }
@@ -54,8 +57,6 @@ public class PetryPot {
      * @return days and dead bacteria needed to fill all pot depending on the conf; -1 if it will never be filled
      */
     public Response calculateDays(ConfigurationOfBacteriaBehavior conf) {
-        long days = 0;
-        long deadBacteria = 0;
         if (conf.toNumber() == 0) {
             return new Response(-1, 0);
         }
@@ -74,13 +75,31 @@ public class PetryPot {
     }
 
     /**
+     * Passes the day for this petri dish performing all necessary actions
+     * first bacteria divides if not sterile, then it can die or becomes sterile, then new bacterias are put in the dish
+     */
+    private void dayPass() {
+        days++;
+        Set<Map.Entry<Address, Bacteria>> notEmptyNotDeadAddresses = addresses //todo this or store in memory?
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue() != null
+                        && entry.getValue().isAlive())
+                .collect(Collectors.toSet());
+
+        for (Map.Entry<Address, Bacteria> entry : notEmptyNotDeadAddresses) {
+
+        }
+    }
+
+    /**
      * Goes through EMPTY neighbors of the given cell and fills it with the bacteriaSupplier based on the given supplier
      *
      * @param height           to check neighbors
      * @param width            to check neighbors
      * @param bacteriaSupplier providing bacteria
      */
-    private void fillNotEmptyNeighbors(int height, int width, Supplier<Bacteria> bacteriaSupplier) {
+    private void fillNotEmptyNeighbors(int height, int width, Supplier<Bacteria> bacteriaSupplier) { //todo refactor to the address
         int startHeight = Math.max(0, height - 1);
         int endHeight = Math.min(height + 1, size - 1);
         int startWidth = Math.max(0, width - 1);
@@ -123,7 +142,8 @@ public class PetryPot {
      * @return true if bacteria was put, false if the place was already not empty
      */
     public boolean putBacteria(Address address, Bacteria bacteriaToPut) {
-        if (addresses.putIfAbsent(address, bacteriaToPut) == null) {
+        if (bacteriaToPut != null
+                && addresses.putIfAbsent(address, bacteriaToPut) == null) {
             fill++;
             return true;
         } else {
