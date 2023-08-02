@@ -9,15 +9,72 @@ import java.util.stream.Collectors;
  */
 public class PetriDish {
     public static final int MAX_SIZE = 10; //todo out of heap for 12_113 now 6k is max
+
     private final int size;
     private final Map<Address, Bacteria> addresses = new HashMap<>();
-    private long fill;
     private long days;
     private long deadBacteria;
-    private final int STERILE_DAYS = 14; // after this age bacteria can not divide
-    private final int DEAD_DAYS = 7; // after this age bacteria gets probability to die
 
-    public record Address(int x, int y) { //todo white throws
+    public class Address {
+        private final int x;
+        private final int y;
+
+        public Address(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        /**
+         * @return collection of not empty neighbors of this address
+         */
+        public Collection<Address> emptyNeighbors() {
+            int startHeight = Math.max(0, y - 1);
+            int endHeight = Math.min(y + 1, size - 1);
+            int startWidth = Math.max(0, x - 1);
+            int endWidth = Math.min(x + 1, size - 1);
+
+            Collection<Address> neighbors = new HashSet<>();
+
+            for (int yTemp = startHeight; yTemp <= endHeight; yTemp++) {
+                for (int xTemp = startWidth; xTemp <= endWidth; xTemp++) {
+                    Address addressToAdd = new Address(xTemp, yTemp);
+                    if (!addressToAdd.equals(this)//checks it's not the same address
+                            && addresses.get(addressToAdd) == null) {
+                        neighbors.add(addressToAdd);
+                    }
+                }
+            }
+            return neighbors;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Address address = (Address) o;
+            return x == address.x && y == address.y;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y);
+        }
+
+        @Override
+        public String toString() {
+            return "Address{" +
+                    x +
+                    "," + y +
+                    '}';
+        }
     }
 
     /**
@@ -78,16 +135,15 @@ public class PetriDish {
      * Passes the day for this petri dish performing all necessary actions
      * first bacteria divides if not sterile, then it can die or becomes sterile, then new bacterias are put in the dish
      */
-    private void dayPass() {
+    private void dayPass(ConfigurationOfBacteriaBehavior conf) {
         days++;
-        Set<Map.Entry<Address, Bacteria>> notEmptyNotDeadAddresses = addresses //todo this or store in memory?
+        Set<Map.Entry<Address, Bacteria>> notEmptyAddresses = addresses //todo this or store in memory?
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getValue() != null
-                        && entry.getValue().isAlive())
+                .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toSet());
 
-        for (Map.Entry<Address, Bacteria> entry : notEmptyNotDeadAddresses) {
+        for (Map.Entry<Address, Bacteria> entry : notEmptyAddresses) {
 
         }
     }
@@ -95,23 +151,12 @@ public class PetriDish {
     /**
      * Goes through EMPTY neighbors of the given cell and fills it with the bacteriaSupplier based on the given supplier
      *
-     * @param height           to check neighbors
-     * @param width            to check neighbors
+     * @param addressToCheck   to check neighbors
      * @param bacteriaSupplier providing bacteria
      */
-    private void fillNotEmptyNeighbors(int height, int width, Supplier<Bacteria> bacteriaSupplier) { //todo refactor to the address
-        int startHeight = Math.max(0, height - 1);
-        int endHeight = Math.min(height + 1, size - 1);
-        int startWidth = Math.max(0, width - 1);
-        int endWidth = Math.min(width + 1, size - 1);
-
-        for (int i = startHeight; i <= endHeight; i++) {
-            for (int j = startWidth; j <= endWidth; j++) {
-                if (!(i == height && j == width)) //checks it's not the same address
-                {
-                    putBacteria(new Address(i, j), bacteriaSupplier.get());
-                }
-            }
+    private void fillNotEmptyNeighbors(Address addressToCheck, Supplier<Bacteria> bacteriaSupplier) {
+        for (Address address : addressToCheck.emptyNeighbors()) {
+            putBacteria(address, bacteriaSupplier.get());
         }
     }
 
@@ -142,13 +187,8 @@ public class PetriDish {
      * @return true if bacteria was put, false if the place was already not empty
      */
     public boolean putBacteria(Address address, Bacteria bacteriaToPut) {
-        if (bacteriaToPut != null
-                && addresses.putIfAbsent(address, bacteriaToPut) == null) {
-            fill++;
-            return true;
-        } else {
-            return false;
-        }
+        return bacteriaToPut != null
+                && addresses.putIfAbsent(address, bacteriaToPut) == null;
     }
 
 }

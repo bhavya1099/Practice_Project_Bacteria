@@ -18,15 +18,15 @@ class PetriDishTest {
     @Test
     public void creationMaxSize(){
         int size = PetriDish.MAX_SIZE;
-        assertTrue(new PetriDish(size).getBacterias().containsKey(new PetriDish.Address(size -1,size-1)));
-        assertFalse(new PetriDish(size).getBacterias().containsKey(new PetriDish.Address(size,size)));
+        assertTrue(new PetriDish(size).getBacterias().containsKey(petriDish.new Address(size -1,size-1)));
+        assertFalse(new PetriDish(size).getBacterias().containsKey(petriDish.new Address(size,size)));
     }
 
     @ParameterizedTest()
     @ValueSource(ints = {1, 2, 3, 5})
     public void creationTestNormal(int size) {
-        assertTrue(new PetriDish(size).getBacterias().containsKey(new PetriDish.Address(size -1,size-1)));
-        assertFalse(new PetriDish(size).getBacterias().containsKey(new PetriDish.Address(size,size)));
+        assertTrue(new PetriDish(size).getBacterias().containsKey(petriDish.new Address(size -1,size-1)));
+        assertFalse(new PetriDish(size).getBacterias().containsKey(petriDish.new Address(size,size)));
     }
 
     @Test
@@ -70,14 +70,14 @@ class PetriDishTest {
 
         @BeforeAll
         private static void getMethod() throws NoSuchMethodException {
-            fillNeighborsPot3x3 = dish3x3.getClass().getDeclaredMethod("fillNotEmptyNeighbors", int.class, int.class, Supplier.class);
+            fillNeighborsPot3x3 = dish3x3.getClass().getDeclaredMethod("fillNotEmptyNeighbors", PetriDish.Address.class, Supplier.class);
             fillNeighborsPot3x3.setAccessible(true);
             bacteriaSupplier = () -> bacteriaToFill;
         }
 
         @Test
         public void neighborsNoNeighbors() throws InvocationTargetException, IllegalAccessException {
-            fillNeighborsPot3x3.invoke(petriDish, 0, 0, bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(petriDish, petriDish.new Address(0,0), bacteriaSupplier); //00
             assertEquals(new HashMap<>(), petriDish.getBacterias());
 
             PetriDish onePot = new PetriDish(1);
@@ -87,7 +87,7 @@ class PetriDishTest {
         @Test
         public void neighbors00AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
             // Address 0 0
-            fillNeighborsPot3x3.invoke(dish3x3, 0, 0, bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(dish3x3, dish3x3.new Address(0,0), bacteriaSupplier);
 
             assertEquals(bacteriaToFill, dish3x3.getBacteria(0, 1));
             assertEquals(bacteriaToFill, dish3x3.getBacteria(1, 1));
@@ -102,7 +102,7 @@ class PetriDishTest {
 
         @Test
         public void neighbors22AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
-            fillNeighborsPot3x3.invoke(dish3x3, 2, 2, bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(dish3x3, dish3x3.new Address(2,2), bacteriaSupplier);
 
             assertEquals(bacteriaToFill, dish3x3.getBacteria(1, 2));
             assertEquals(bacteriaToFill, dish3x3.getBacteria(1, 1));
@@ -117,7 +117,7 @@ class PetriDishTest {
 
         @Test
         public void neighbors11AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
-            fillNeighborsPot3x3.invoke(dish3x3, 1, 1, bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(dish3x3, dish3x3.new Address(1,1), bacteriaSupplier);
 
             assertEquals(bacteriaToFill, dish3x3.getBacteria(0, 0));
             assertEquals(bacteriaToFill, dish3x3.getBacteria(0, 1));
@@ -136,10 +136,10 @@ class PetriDishTest {
             Bacteria bacteriaToFill = new Bacteria();
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    dish3x3.putBacteria(new PetriDish.Address(i, j), new Bacteria());
+                    dish3x3.putBacteria(dish3x3.new Address(i, j), new Bacteria());
                 }
             }
-            fillNeighborsPot3x3.invoke(dish3x3, 1, 1, bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(dish3x3, dish3x3.new Address(1,1), bacteriaSupplier);
 
             assertNotSame(bacteriaToFill, dish3x3.getBacteria(0, 0));
             assertNotSame(bacteriaToFill, dish3x3.getBacteria(0, 1));
@@ -156,10 +156,10 @@ class PetriDishTest {
         public void neighbors11AddressSomeFilled() throws InvocationTargetException, IllegalAccessException {
             for (int i = 0; i < 2; i++) {
                 for (int j = 0; j < 2; j++) {
-                    dish3x3.putBacteria(new PetriDish.Address(i, j), new Bacteria());
+                    dish3x3.putBacteria(dish3x3.new Address(i, j), new Bacteria());
                 }
             }
-            fillNeighborsPot3x3.invoke(dish3x3, 1, 1, bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(dish3x3, dish3x3.new Address(1,1), bacteriaSupplier);
 
             assertNotSame(bacteriaToFill, dish3x3.getBacteria(0, 0));
             assertNotSame(bacteriaToFill, dish3x3.getBacteria(0, 1));
@@ -177,7 +177,7 @@ class PetriDishTest {
 
         @Test
         public void neighbors10AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
-            fillNeighborsPot3x3.invoke(dish3x3, 1, 0, bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(dish3x3, dish3x3.new Address(1,0), bacteriaSupplier);
 
             assertEquals(bacteriaToFill, dish3x3.getBacteria(0, 0));
             assertEquals(bacteriaToFill, dish3x3.getBacteria(0, 1));
@@ -193,7 +193,7 @@ class PetriDishTest {
 
         @Test
         public void neighbors01AddressAllAreEmpty() throws InvocationTargetException, IllegalAccessException {
-            fillNeighborsPot3x3.invoke(dish3x3, 0, 1, bacteriaSupplier);
+            fillNeighborsPot3x3.invoke(dish3x3, dish3x3.new Address(0,1), bacteriaSupplier);
 
             assertEquals(bacteriaToFill, dish3x3.getBacteria(0, 0));
             assertEquals(bacteriaToFill, dish3x3.getBacteria(1, 0));
