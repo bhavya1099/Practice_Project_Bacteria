@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
  * Class represents a bunch of addresses, and bacteria behaviour in the pot
  */
 public class PetriDish {
-    public static final int MAX_SIZE = 10; //todo out of heap for 12_113 now 6k is max
+    public static final int MAX_SIZE = 100; //out of heap for 12_113 now 1k is max
     /**
      * dimension of the field, must be from 0 to MAX_SIZE; overall real size is size^2
      */
@@ -166,11 +166,11 @@ public class PetriDish {
                 .stream()
                 .filter(entry -> entry.getValue() == null)
                 .map(Map.Entry::getKey)
-                .toList();
-        int emptySize = emptyAddresses.size();
-        if (emptySize > numberOfBacterias) {
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        if (emptyAddresses.size() > numberOfBacterias) {
             for (int i = 0; i < numberOfBacterias; i++) {
-                putBacteria(emptyAddresses.get(rand.nextInt(emptySize)), new Bacteria(conf));
+                putBacteria(emptyAddresses.remove(rand.nextInt(emptyAddresses.size())), new Bacteria(conf));
             }
         } else {
             emptyAddresses.forEach(address -> putBacteria(address, new Bacteria(conf)));
