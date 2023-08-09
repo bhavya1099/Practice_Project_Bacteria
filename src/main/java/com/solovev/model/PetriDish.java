@@ -136,13 +136,13 @@ public class PetriDish {
      * all not dead or sterile bacterias present in the dish first divides then grows old; Bacteria can die during this method and will increment dead bacteria counter
      */
     private void divideBacteria() {
-        Collection<Map.Entry<Address, Bacteria>> notEmptyNotDeadAddresses = addresses //todo this or store in memory?
+        Collection<Map.Entry<Address, Bacteria>> emptyNotDeadAddresses = addresses
                 .entrySet()
                 .stream()
                 .filter(entry -> entry.getValue() != null && entry.getValue().isAlive())
                 .collect(Collectors.toSet());
 
-        for (Map.Entry<Address, Bacteria> entry : notEmptyNotDeadAddresses) {
+        for (Map.Entry<Address, Bacteria> entry : emptyNotDeadAddresses) {
             Bacteria bacteria = entry.getValue();
             fillNotEmptyNeighbors(entry.getKey(), bacteria.divisionStrategy());
             //after division, it grows old and can become sterile or die
